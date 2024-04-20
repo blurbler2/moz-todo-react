@@ -14,7 +14,6 @@ function Todo(props) {
         props.onEditTask(props.id, newName);
         setNewName("");
         setEditing(false);
-        console.log(props.id, props.name, newName)
     }
 
     const editingTemplate = (
