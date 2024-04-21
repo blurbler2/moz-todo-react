@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { nanoid } from "nanoid";
 
 import Form from "./components/Form";
@@ -14,7 +14,17 @@ const FILTER_MAP = {
 
 const FILTER_NAMES = Object.keys(FILTER_MAP);
 
+function usePrevious(value) {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+}
+
 function App(props) {
+  const listHeadingRef = useRef(null);
+
   function addTask(name) {
     const newTask = {id: `todo-${nanoid()}`, name, completed: false};
     setTasks([...tasks, newTask]);
@@ -73,7 +83,16 @@ function App(props) {
 
   const tasksNoun = taskList.length !== 1 ? "tasks" : "task";
   const headingText = `${taskList.length} ${tasksNoun} remaining`;
-
+  
+  const prevTaskLength = usePrevious(tasks.length);
+  
+  // We only try to focus on our list heading if we have fewer tasks now than we did before.
+  useEffect(() => {
+    if (tasks.length < prevTaskLength) {
+      listHeadingRef.current.focus();
+    }
+  }, [tasks.length, prevTaskLength]);
+  
 
   return (
     <div className="todoapp stack-large">
@@ -82,7 +101,13 @@ function App(props) {
       <div className="filters btn-group stack-exception">
         {filterList}
       </div>
-      <h2 id="list-heading">{headingText}</h2>
+      <h2 
+        id="list-heading"
+        tabIndex={-1}
+        ref={listHeadingRef}
+      >
+        {headingText}
+      </h2>
       <ul
         role="list"
         className="todo-list stack-large stack-exception"
